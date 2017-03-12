@@ -1,0 +1,36 @@
+---
+title: "Mapping Project"
+author: "JiBorman"
+date: "3/12/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(stringsAsFactors = F)
+library(leaflet)
+library(ggmap)
+```
+
+```{r MapSetup, message=F,warning=F}
+Birthdate <- "2016-12-06"
+CitiesVisted <- c('Boston','New York City', 'Houston','Washington, D.C.')
+TripLength<-c(NA, 6, 2, 5)
+LifeLength <- as.numeric(Sys.Date()-as.Date(Birthdate))
+TripLength[is.na(TripLength)] <- LifeLength - sum(TripLength, na.rm = T)
+df <- data.frame(name = CitiesVisted,
+                 lat=geocode(CitiesVisted)$lat,
+                 lng=geocode(CitiesVisted)$lon,
+                 pLife=TripLength/LifeLength)
+```
+
+# Time spent in different cities by Baby
+```{r doMapping, message=F, warning=F}
+df %>%
+  leaflet() %>%
+  addTiles() %>%
+  addCircleMarkers(radius=10, weight = 10*df$pLife, popup = paste0("Baby has spent ", round(100*df$pLife, 2) ,"% of his lifetime in ", df$name))
+
+
+```
+
